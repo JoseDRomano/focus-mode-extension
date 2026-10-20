@@ -13,44 +13,44 @@
   "permissions": ["declarativeNetRequest", "storage", "alarms"],
   "host_permissions": ["*://*/*"],
   "background": {
-    "service_worker": "background.js",
+    "service_worker": "src/background.js",
     "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["*://www.youtube.com/*"],
-      "css": ["youtube.css"],
-      "js": ["cleanup.js", "youtube.js"],
+      "css": ["src/content/youtube.css"],
+      "js": ["src/content/cleanup.js", "src/content/youtube.js"],
       "run_at": "document_start"
     },
     {
       "matches": ["*://www.linkedin.com/*"],
-      "css": ["linkedin.css"],
-      "js": ["cleanup.js"],
+      "css": ["src/content/linkedin.css"],
+      "js": ["src/content/cleanup.js"],
       "run_at": "document_start"
     },
     {
       "matches": ["*://x.com/*", "*://twitter.com/*"],
-      "css": ["x.css"],
-      "js": ["cleanup.js"],
+      "css": ["src/content/x.css"],
+      "js": ["src/content/cleanup.js"],
       "run_at": "document_start"
     },
     {
       "matches": ["*://www.reddit.com/*"],
-      "css": ["reddit.css"],
-      "js": ["cleanup.js"],
+      "css": ["src/content/reddit.css"],
+      "js": ["src/content/cleanup.js"],
       "run_at": "document_start"
     },
     {
       "matches": ["*://www.instagram.com/*"],
-      "css": ["instagram.css"],
-      "js": ["cleanup.js", "instagram.js"],
+      "css": ["src/content/instagram.css"],
+      "js": ["src/content/cleanup.js", "src/content/instagram.js"],
       "run_at": "document_start"
     }
   ],
   "action": {
     "default_title": "Focus Mode",
-    "default_popup": "popup.html",
+    "default_popup": "src/pages/popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png"
@@ -58,11 +58,11 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["blocked.html"],
+      "resources": ["src/pages/blocked.html"],
       "matches": ["*://*/*"]
     },
     {
-      "resources": ["settings.js"],
+      "resources": ["src/shared/settings.js"],
       "matches": [
         "*://www.youtube.com/*",
         "*://www.linkedin.com/*",

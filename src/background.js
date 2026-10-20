@@ -1,11 +1,11 @@
-import { formatTime, getSettings, getStatus, matchSite, sitePattern } from "./settings.js";
-import { recordFocusMinute } from "./stats.js";
+import { formatTime, getSettings, getStatus, matchSite, sitePattern } from "./shared/settings.js";
+import { recordFocusMinute } from "./shared/stats.js";
 
 const CHECK_ALARM = "focus-check";
 const BREAK_ALARM = "break-end";
 
 const blockedPath = (site, attempt) =>
-  `/blocked.html?site=${encodeURIComponent(site)}${attempt ? "&attempt=1" : ""}`;
+  `/src/pages/blocked.html?site=${encodeURIComponent(site)}${attempt ? "&attempt=1" : ""}`;
 
 // One rule per site so the blocked page knows which site was tried.
 function buildRules(sites) {
@@ -86,7 +86,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   update();
   if (reason === "install") {
     await chrome.storage.local.set({ installedAt: Date.now() });
-    chrome.tabs.create({ url: "setup.html" });
+    chrome.tabs.create({ url: chrome.runtime.getURL("src/pages/setup.html") });
   }
 });
 

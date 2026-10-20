@@ -2,7 +2,7 @@
 # Renders icons/icon.svg into the PNG sizes Chrome and the Web Store need.
 # Uses headless Google Chrome, so each size is drawn from the vector directly.
 set -eu
-cd "$(dirname "$0")/icons"
+cd "$(dirname "$0")/../icons"
 
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 tmp=$(mktemp -d)

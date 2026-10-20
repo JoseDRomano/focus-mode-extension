@@ -10,7 +10,7 @@ function onCleanupChange(listener) {
 
 (async () => {
   const root = document.documentElement;
-  const { getSettings } = await import(chrome.runtime.getURL("settings.js"));
+  const { getSettings } = await import(chrome.runtime.getURL("src/shared/settings.js"));
   let options = {};
   let path = null;
 

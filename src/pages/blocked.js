@@ -1,5 +1,5 @@
-import { formatTime, getSettings, getStatus } from "./settings.js";
-import { recordAttempt } from "./stats.js";
+import { formatTime, getSettings, getStatus } from "../shared/settings.js";
+import { recordAttempt } from "../shared/stats.js";
 
 const params = new URLSearchParams(location.search);
 const site = params.get("site");

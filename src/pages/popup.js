@@ -1,9 +1,9 @@
 import {
   CLEANUP_OPTIONS, dayKey, describeSchedule, formatTime, getBreakState, getSettings,
   getStatus, normalizeSite, scheduleShrinks, todaysEnd,
-} from "./settings.js";
-import { attemptsToday, getHistory, getStats, logBypass } from "./stats.js";
-import { buildCleanupToggles, createScheduleEditor, renderSiteList } from "./ui.js";
+} from "../shared/settings.js";
+import { attemptsToday, getHistory, getStats, logBypass } from "../shared/stats.js";
+import { buildCleanupToggles, createScheduleEditor, renderSiteList } from "../shared/ui.js";
 
 const BYPASS_SENTENCE = "I am choosing to be distracted instead of doing my work.";
 // Chance the wheel refuses a bypass: 1st, 2nd, then every later attempt today.

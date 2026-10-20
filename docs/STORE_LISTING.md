@@ -70,12 +70,12 @@ chosen work hours and hiding distracting sections of selected sites.
 - [ ] At least 1 screenshot, 1280×800 or 640×400: popup, setup page, blocked page,
       wheel of destiny
 - [ ] Optional small promo tile, 440×280
-- [ ] Privacy policy URL: host `PRIVACY.md` publicly (for example GitHub Pages or a
-      public gist) and fill in the contact email first
+- [ ] Privacy policy URL: fill in the contact email in `docs/PRIVACY.md`, then use
+      https://github.com/JoseDRomano/focus-mode-extension/blob/main/docs/PRIVACY.md
 
 ## Publishing
 
-1. Run `./package.sh` to build `dist/focus-mode-<version>.zip`.
+1. Run `scripts/package.sh` to build `dist/focus-mode-<version>.zip`.
 2. Register at https://chrome.google.com/webstore/devconsole (one-time $5 fee).
 3. Upload the zip, fill in the fields above, and submit for review.
 4. For later releases, bump `version` in `manifest.json` and repeat steps 1 and 3.

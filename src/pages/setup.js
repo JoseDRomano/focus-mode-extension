@@ -1,5 +1,5 @@
-import { DEFAULT_SETTINGS, PRESETS, describeSchedule, getSettings, normalizeSite } from "./settings.js";
-import { buildCleanupToggles, createScheduleEditor, renderSiteList } from "./ui.js";
+import { DEFAULT_SETTINGS, PRESETS, describeSchedule, getSettings, normalizeSite } from "../shared/settings.js";
+import { buildCleanupToggles, createScheduleEditor, renderSiteList } from "../shared/ui.js";
 
 const settings = await getSettings();
 const steps = [...document.querySelectorAll(".step")];
