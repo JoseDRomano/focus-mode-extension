@@ -13,7 +13,13 @@
       padding: 16px;
     }
 
+    /* All steps share one grid cell below the progress bar, and inactive ones
+       stay in the layout (just invisible), so the card is always as tall as
+       the tallest step. */
     .card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
       width: 100%;
       max-width: 500px;
       padding: 36px 32px;
@@ -27,15 +33,58 @@
       margin-bottom: 32px;
     }
 
-    .progress span {
-      flex: 1;
-      height: 3px;
-      border-radius: 2px;
-      background: var(--line);
-      transition: background 0.2s;
+    /* Keeps its space when hidden, so the card is the same size either way */
+    .progress[hidden] { visibility: hidden; }
+
+    .step,
+    .step[hidden] {
+      grid-row: 2;
+      grid-column: 1;
+      display: flex;
+      flex-direction: column;
     }
 
-    .progress span.filled { background: var(--fg); }
+    .step[hidden] { visibility: hidden; }
+
+    /* The current step sits above the one fading out, so clicks always land on
+       it. (Not `inert` on the old step: Chrome can leave parts of a subtree
+       stuck inert after it's removed, making buttons unclickable.) */
+    .step.current { z-index: 1; }
+
+    .progress span {
+      position: relative;
+      flex: 1;
+      height: 3px;
+      overflow: hidden;
+      border-radius: 2px;
+      background: var(--line);
+    }
+
+    /* Each segment fills left to right */
+    .progress span::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--fg);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .progress span.filled::after { transform: scaleX(1); }
+
+    .step h1:focus { outline: none; }
+
+    .nav button {
+      transition: opacity 0.15s, transform 0.12s;
+    }
+
+    .nav button:active { transform: scale(0.97); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .progress span::after { transition-duration: 0.1s; }
+      .nav button:active { transform: none; }
+    }
 
     h1 {
       margin-bottom: 8px;
@@ -126,36 +175,381 @@
       line-height: 1.5;
     }
 
+    /* Pinned to the bottom of the card, so the buttons sit in the same place
+       on every step. */
     .nav {
       display: flex;
       gap: 8px;
       justify-content: flex-end;
-      margin-top: 28px;
+      margin-top: auto;
+      padding-top: 28px;
     }
 
-    .nav .secondary { margin-right: auto; }
+    /* The first non-primary button (Back, or Skip tour) sits on the left */
+    .nav > :first-child:not(.primary) { margin-right: auto; }
+
+    .nav .link-button {
+      margin-top: 0;
+      color: var(--muted);
+    }
+
+    .nav-center { justify-content: center; }
+
+    /* Centered layout: welcome, "already set up" and the tour */
+
+    .centered {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .centered .lead {
+      max-width: 380px;
+      color: var(--muted);
+    }
+
+    .centered .lead strong { color: var(--fg); }
+
+    .logo {
+      display: block;
+      margin-bottom: 24px;
+      border-radius: 16px;
+      box-shadow: 0 0 0 1px var(--line);
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .highlights {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin: 16px 0 24px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .highlights li {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .highlights strong { font-size: 0.9rem; }
+
+    .highlights span {
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+
+    /* Tour illustrations: small black-and-white mocks of the real UI */
+
+    .art {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      max-width: 360px;
+      height: 156px;
+      margin-bottom: 24px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .mock-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 280px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    .mock-omnibox {
+      flex: 1;
+      height: 10px;
+      border-radius: 5px;
+      background: var(--line);
+    }
+
+    .mock-ext {
+      position: relative;
+      width: 28px;
+      height: 28px;
+    }
+
+    .mock-ext img {
+      display: block;
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      box-shadow: 0 0 0 1px var(--line);
+    }
+
+    .mock-badge {
+      position: absolute;
+      right: -12px;
+      bottom: -7px;
+      padding: 1px 5px;
+      border: 2px solid var(--bg);
+      border-radius: 5px;
+      background: var(--fg);
+      color: var(--bg);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .mock-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--line);
+    }
+
+    .mock-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      width: 330px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: var(--fg);
+      color: var(--bg);
+      text-align: left;
+    }
+
+    .mock-status strong {
+      display: block;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .mock-status small {
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .mock-button {
+      padding: 6px 10px;
+      border: 1px solid currentColor;
+      border-radius: 7px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .mock-tiles {
+      display: grid;
+      grid-template-columns: repeat(3, 96px);
+      gap: 8px;
+    }
+
+    .mock-tiles div {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 88px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .mock-tiles span {
+      color: var(--muted);
+      font-size: 0.65rem;
+      line-height: 1.3;
+    }
+
+    .mock-tiles strong { font-size: 1.3rem; }
+
+    .mock-popup {
+      width: 260px;
+      text-align: left;
+    }
+
+    .mock-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .mock-header strong {
+      margin-right: auto;
+      font-size: 0.95rem;
+    }
+
+    .mock-icon {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .mock-icon .icon { width: 15px; height: 15px; }
+
+    .mock-icon.pressed { border-color: var(--fg); }
+
+    .mock-icon.locked {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border-color: var(--fg);
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .mock-icon.locked .icon { width: 22px; height: 22px; }
+
+    .mock-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .mock-tabs span { padding: 5px 0; border-radius: 6px; }
+
+    .mock-tabs .on { background: var(--fg); color: var(--bg); }
+
+    .mock-effort {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .mock-sentence {
+      width: 190px;
+      padding: 10px 12px;
+      border: 1px dashed var(--fg);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    .mock-caret {
+      display: inline-block;
+      width: 1.5px;
+      height: 1em;
+      margin-left: 2px;
+      vertical-align: -2px;
+      background: var(--fg);
+    }
+
+    .mock-wheel-wrap { position: relative; }
+
+    .mock-wheel {
+      width: 72px;
+      height: 72px;
+      border: 2px solid var(--fg);
+      border-radius: 50%;
+      background: conic-gradient(var(--fg) 0 50%, var(--bg) 50% 100%);
+      transform: rotate(30deg);
+    }
+
+    .mock-pointer {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      z-index: 1;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 10px solid var(--fg);
+    }
+
+    .mock-lock {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+    }
+
+    .mock-blocked {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 290px;
+      padding: 20px;
+      border-radius: 10px;
+      background: var(--line);
+    }
+
+    .mock-blocked strong { font-size: 1.05rem; }
+
+    .mock-blocked span {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
   </style>
 </head>
 <body>
   <main class="card">
-    <div class="progress" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
+    <!-- Segments are generated per phase (setup or tour) by setup.js -->
+    <div class="progress" aria-hidden="true"></div>
 
-    <section class="step" data-step="welcome">
-      <h1>Welcome to Focus Mode</h1>
-      <p class="lead">
-        Focus Mode blocks distracting sites during your work hours. The rest of the
-        time, it can hide the most addictive parts of them, like YouTube Shorts and
-        the LinkedIn feed.
-      </p>
-      <p class="hint">Setup takes about a minute.</p>
-      <div class="nav">
+    <section class="step" data-step="welcome" data-phase="setup">
+      <div class="centered">
+        <img class="logo" src="../../icons/icon.svg" width="72" height="72" alt="Focus Mode">
+        <h1>Welcome to Focus Mode</h1>
+        <p class="lead">
+          Keep distracting sites out of your work hours, and the rest of your day a
+          little calmer.
+        </p>
+        <ul class="highlights">
+          <li>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M5.6 5.6l12.8 12.8"></path></svg>
+            <strong>Block</strong>
+            <span>Distracting sites are off-limits while you work.</span>
+          </li>
+          <li>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle><path d="M3 3l18 18"></path></svg>
+            <strong>Clean up</strong>
+            <span>Shorts and feeds disappear the rest of the time.</span>
+          </li>
+          <li>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            <strong>Stay honest</strong>
+            <span>Loosening your settings takes real effort.</span>
+          </li>
+        </ul>
+        <p class="hint">Setup takes about a minute.</p>
+      </div>
+      <div class="nav nav-center">
         <button type="button" class="primary" data-next>Get started</button>
       </div>
     </section>
 
-    <section class="step" data-step="schedule" hidden>
+    <section class="step" data-step="schedule" data-phase="setup" hidden>
       <p class="step-label">Step 1 of 4</p>
       <h1>When do you work?</h1>
       <p class="hint">Sites are blocked during these hours.</p>
@@ -173,7 +567,7 @@
       </div>
     </section>
 
-    <section class="step" data-step="sites" hidden>
+    <section class="step" data-step="sites" data-phase="setup" hidden>
       <p class="step-label">Step 2 of 4</p>
       <h1>What distracts you?</h1>
       <p class="hint">Pick the sites to block. You can change this later from the toolbar icon.</p>
@@ -196,7 +590,7 @@
       </div>
     </section>
 
-    <section class="step" data-step="cleanup" hidden>
+    <section class="step" data-step="cleanup" data-phase="setup" hidden>
       <p class="step-label">Step 3 of 4</p>
       <h1>Clean up the rest of the time</h1>
       <p class="hint">Outside work hours, these sites still load, minus the parts you pick here.</p>
@@ -207,7 +601,7 @@
       </div>
     </section>
 
-    <section class="step" data-step="done" hidden>
+    <section class="step" data-step="done" data-phase="setup" hidden>
       <p class="step-label">Step 4 of 4</p>
       <h1>You're all set</h1>
       <p class="hint">Here's your setup:</p>
@@ -217,27 +611,195 @@
         <li><span>Blocked</span><span id="summary-sites"></span></li>
         <li><span>Cleanups</span><span id="summary-cleanup"></span></li>
       </ul>
-      <p class="tip">
-        <strong>Pin the extension.</strong> Click the puzzle-piece icon in Chrome's toolbar
-        and pin Focus Mode. The icon shows how much focus time is left, and it's where
-        you take breaks.
-      </p>
-      <p class="hint">
-        From the toolbar icon you can also <strong>lock</strong> your settings until a set
-        time, so you can't loosen them on impulse.
-      </p>
+      <p class="hint">Next, a quick tour of how everything works. It takes a minute.</p>
       <div class="nav">
         <button type="button" class="secondary" data-back>Back</button>
-        <button type="button" class="primary" id="finish">Finish</button>
+        <button type="button" class="primary" id="finish">Finish setup</button>
       </div>
     </section>
 
-    <section class="step" data-step="already" hidden>
-      <h1>Already set up</h1>
-      <p class="lead">
-        Focus Mode is already configured. Use the toolbar icon to change your hours,
-        sites and cleanups.
-      </p>
+    <section class="step" data-step="already" data-phase="already" hidden>
+      <div class="centered">
+        <img class="logo" src="../../icons/icon.svg" width="72" height="72" alt="Focus Mode">
+        <h1>You're already set up</h1>
+        <p class="lead">
+          Change your hours, sites and cleanups anytime from the Focus Mode icon in the
+          toolbar.
+        </p>
+      </div>
+      <div class="nav nav-center">
+        <button type="button" class="primary" data-next>Take the tour</button>
+      </div>
+    </section>
+
+    <!-- Quick tour, shown after setup (or from the "already set up" page) -->
+
+    <section class="step" data-step="tour-badge" data-phase="tour" hidden>
+      <div class="centered">
+        <div class="art">
+          <div class="mock-toolbar">
+            <span class="mock-omnibox"></span>
+            <span class="mock-ext"><img src="../../icons/icon.svg" alt=""><span class="mock-badge">2h</span></span>
+            <span class="mock-dot"></span>
+          </div>
+        </div>
+        <p class="step-label" data-tour-label></p>
+        <h1>Pin it to your toolbar</h1>
+        <p class="lead">
+          Click the puzzle-piece icon and pin Focus Mode. During work hours the badge
+          counts down your focus time, and turns grey on a break.
+        </p>
+      </div>
+      <div class="nav">
+        <button type="button" class="link-button" data-close>Skip tour</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="tour-breaks" data-phase="tour" hidden>
+      <div class="centered">
+        <div class="art">
+          <div class="mock-status">
+            <div>
+              <strong>Blocking until 17:00</strong>
+              <small><span data-fill="breaksPerDay">3</span> of <span data-fill="breaksPerDay">3</span> breaks left today</small>
+            </div>
+            <span class="mock-button">Take a <span data-fill="breakMinutes">5</span>-min break</span>
+          </div>
+        </div>
+        <p class="step-label" data-tour-label></p>
+        <h1>Take a break, guilt-free</h1>
+        <p class="lead" id="tour-breaks-lead">
+          Open the popup and tap <strong>Take a break</strong>. Everything unblocks for
+          <span data-fill="breakMinutes">5</span> minutes, then blocking comes back on its
+          own. You get <span data-fill="breaksPerDay">3</span> a day.
+        </p>
+      </div>
+      <div class="nav">
+        <button type="button" class="link-button" data-close>Skip tour</button>
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="tour-stats" data-phase="tour" hidden>
+      <div class="centered">
+        <div class="art">
+          <div class="mock-tiles">
+            <div><span>Focus hours, last 7 days</span><strong>12.5</strong></div>
+            <div><span>Days without a bypass</span><strong>4</strong></div>
+            <div><span>Blocked visits today</span><strong>7</strong></div>
+          </div>
+        </div>
+        <p class="step-label" data-tour-label></p>
+        <h1>See how you're doing</h1>
+        <p class="lead">
+          The popup opens on your stats: focus hours this week, days without a bypass,
+          and the sites you reach for most.
+        </p>
+      </div>
+      <div class="nav">
+        <button type="button" class="link-button" data-close>Skip tour</button>
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="tour-settings" data-phase="tour" hidden>
+      <div class="centered">
+        <div class="art">
+          <div class="mock-popup">
+            <div class="mock-header">
+              <strong>Focus Mode</strong>
+              <span class="mock-icon pressed">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </span>
+              <span class="mock-icon">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 7.75-1.4"></path></svg>
+              </span>
+            </div>
+            <div class="mock-tabs"><span class="on">Schedule</span><span>Sites</span><span>Cleanup</span></div>
+          </div>
+        </div>
+        <p class="step-label" data-tour-label></p>
+        <h1>Change your setup anytime</h1>
+        <p class="lead">
+          The <strong>cog</strong> holds your schedule, blocked sites and cleanups.
+          Adding sites or hours always works instantly.
+        </p>
+      </div>
+      <div class="nav">
+        <button type="button" class="link-button" data-close>Skip tour</button>
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="tour-effort" data-phase="tour" hidden>
+      <div class="centered">
+        <div class="art">
+          <div class="mock-effort">
+            <div class="mock-sentence">I am choosing to be distracted<span class="mock-caret"></span></div>
+            <div class="mock-wheel-wrap"><span class="mock-pointer"></span><div class="mock-wheel"></div></div>
+          </div>
+        </div>
+        <p class="step-label" data-tour-label></p>
+        <h1>Loosening takes effort</h1>
+        <p class="lead">
+          Removing a site or cutting your hours means typing out a sentence by hand.
+          Then the wheel of destiny decides, and the odds get worse with every try.
+        </p>
+      </div>
+      <div class="nav">
+        <button type="button" class="link-button" data-close>Skip tour</button>
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="tour-lock" data-phase="tour" hidden>
+      <div class="centered">
+        <div class="art">
+          <div class="mock-lock">
+            <span class="mock-icon locked">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            </span>
+            <span>Locked until <strong>Fri 18:00</strong></span>
+          </div>
+        </div>
+        <p class="step-label" data-tour-label></p>
+        <h1>Lock it when you mean it</h1>
+        <p class="lead">
+          The <strong>padlock</strong> locks your settings until a time you pick. Until
+          then nothing can be loosened, not even with the sentence.
+        </p>
+      </div>
+      <div class="nav">
+        <button type="button" class="link-button" data-close>Skip tour</button>
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="tour-blocked" data-phase="tour" hidden>
+      <div class="centered">
+        <div class="art">
+          <div class="mock-blocked">
+            <strong>Focus time</strong>
+            <span>youtube.com is blocked until 17:00. Back to work!</span>
+          </div>
+        </div>
+        <p class="step-label" data-tour-label></p>
+        <h1>Blocked means blocked</h1>
+        <p class="lead">
+          Open a blocked site during work hours and you land here instead. Every
+          attempt shows up in your stats.
+        </p>
+      </div>
+      <div class="nav">
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-close>Start focusing</button>
+      </div>
     </section>
   </main>
   <script type="module" src="setup.js"></script>

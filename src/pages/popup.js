@@ -68,6 +68,11 @@ lockToggle.addEventListener("click", () => {
   showPanel(current === "lock" ? beforeLock : "lock");
 });
 
+document.getElementById("tour-button").addEventListener("click", async () => {
+  await chrome.tabs.create({ url: chrome.runtime.getURL("src/pages/setup.html?tour") });
+  window.close();
+});
+
 // Status and breaks
 
 const statusCard = document.getElementById("status-card");

@@ -8,5 +8,5 @@ out="dist/focus-mode-$version.zip"
 
 mkdir -p dist
 rm -f "$out"
-zip -q -r "$out" manifest.json src icons -x "icons/store-icon-128.png" "icons/icon.svg" "*.DS_Store"
+zip -q -r "$out" manifest.json src icons -x "icons/store-icon-128.png" "*.DS_Store"
 echo "Built $out"
