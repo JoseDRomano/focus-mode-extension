@@ -1,0 +1,40 @@
+/* Shorts: shelves, single Shorts in feeds and results, sidebar entry, channel tab */
+html[data-fm-youtubeshorts] :is(
+  ytd-rich-shelf-renderer[is-shorts],
+  ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+  ytd-rich-section-renderer:has(ytm-shorts-lockup-view-model),
+  ytd-rich-section-renderer:has(ytm-shorts-lockup-view-model-v2),
+  ytd-reel-shelf-renderer,
+  grid-shelf-view-model:has(ytm-shorts-lockup-view-model),
+  grid-shelf-view-model:has(ytm-shorts-lockup-view-model-v2),
+  ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+  ytd-video-renderer:has(a[href^="/shorts/"]),
+  ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+  ytd-compact-video-renderer:has(a[href^="/shorts/"]),
+  ytd-guide-entry-renderer:has(a[title="Shorts"]),
+  ytd-mini-guide-entry-renderer[aria-label="Shorts"],
+  yt-tab-shape[tab-title="Shorts"]
+) {
+  display: none !important;
+}
+
+/* Home page recommendations */
+html[data-fm-youtubehome] ytd-browse[page-subtype="home"] ytd-rich-grid-renderer {
+  display: none !important;
+}
+
+/* Suggested videos next to the player, end screens and autoplay countdown */
+html[data-fm-youtuberecs] :is(
+  ytd-watch-flexy #related,
+  .ytp-endscreen-content,
+  .ytp-ce-element,
+  .ytp-autonav-endscreen-countdown-overlay,
+  .ytp-fullscreen-grid
+) {
+  display: none !important;
+}
+
+/* Comments */
+html[data-fm-youtubecomments] ytd-comments#comments {
+  display: none !important;
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Background -->
+  <rect width="128" height="128" rx="28" fill="#000"/>
+  <!-- "F." in Inter Bold (SIL Open Font License), converted to outlines so the
+       icon doesn't depend on the font being installed. -->
+  <path fill="#fff" transform="translate(25.01 96.17) scale(0.04374 -0.04374)" d="M135 0V1490H1115V1237H440V821H1049V572H440V0ZM1475 -19Q1402 -19 1352.0 30.5Q1302 80 1302 153Q1302 226 1352.0 275.5Q1402 325 1475 325Q1548 325 1598.0 275.5Q1648 226 1648 153Q1648 80 1598.0 30.5Q1548 -19 1475 -19Z"/>
+</svg>

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Focus Mode setup</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+      padding: 36px 32px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 32px;
+    }
+
+    .progress span {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--line);
+      transition: background 0.2s;
+    }
+
+    .progress span.filled { background: var(--fg); }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: 1.6rem;
+    }
+
+    .step-label {
+      margin: 0 0 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .lead {
+      margin: 0 0 16px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .step > .hint { margin-bottom: 24px; }
+
+    .presets {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .presets .chip {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .presets small {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .presets .chip:has(input:checked) small {
+      color: inherit;
+      opacity: 0.7;
+    }
+
+    #schedule-error {
+      margin: 0 0 16px;
+      font-size: 0.85rem;
+    }
+
+    #schedule-error:empty { display: none; }
+
+    .summary {
+      list-style: none;
+      margin: 0 0 20px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .summary li {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+    }
+
+    .summary li + li { border-top: 1px solid var(--line); }
+
+    .summary span:first-child { color: var(--muted); }
+
+    .summary span:last-child {
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .tip {
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      border: 1px dashed var(--fg);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 28px;
+    }
+
+    .nav .secondary { margin-right: auto; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="progress" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <section class="step" data-step="welcome">
+      <h1>Welcome to Focus Mode</h1>
+      <p class="lead">
+        Focus Mode blocks distracting sites during your work hours. The rest of the
+        time, it can hide the most addictive parts of them, like YouTube Shorts and
+        the LinkedIn feed.
+      </p>
+      <p class="hint">Setup takes about a minute.</p>
+      <div class="nav">
+        <button type="button" class="primary" data-next>Get started</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="schedule" hidden>
+      <p class="step-label">Step 1 of 4</p>
+      <h1>When do you work?</h1>
+      <p class="hint">Sites are blocked during these hours.</p>
+      <div id="schedule-editor"></div>
+      <fieldset class="field-pair">
+        <legend>Breaks</legend>
+        <label>Per day <input type="number" id="breaks-per-day" min="0" max="20" step="1"></label>
+        <label>Minutes each <input type="number" id="break-minutes" min="1" max="60" step="1"></label>
+      </fieldset>
+      <p class="hint">A break unblocks everything for a few minutes, then blocking resumes on its own.</p>
+      <p id="schedule-error" class="error"></p>
+      <div class="nav">
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="sites" hidden>
+      <p class="step-label">Step 2 of 4</p>
+      <h1>What distracts you?</h1>
+      <p class="hint">Pick the sites to block. You can change this later from the toolbar icon.</p>
+      <fieldset>
+        <legend>Popular</legend>
+        <div id="presets" class="presets"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Other sites</legend>
+        <form id="site-form" class="add-site">
+          <input type="text" id="site-input" placeholder="e.g. news.ycombinator.com" autocomplete="off" spellcheck="false">
+          <button type="submit" class="primary">Add</button>
+        </form>
+        <p id="site-error" class="error"></p>
+        <ul id="custom-list" class="list" hidden></ul>
+      </fieldset>
+      <div class="nav">
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="cleanup" hidden>
+      <p class="step-label">Step 3 of 4</p>
+      <h1>Clean up the rest of the time</h1>
+      <p class="hint">Outside work hours, these sites still load, minus the parts you pick here.</p>
+      <div id="cleanup-toggles"></div>
+      <div class="nav">
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" data-next>Next</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="done" hidden>
+      <p class="step-label">Step 4 of 4</p>
+      <h1>You're all set</h1>
+      <p class="hint">Here's your setup:</p>
+      <ul class="summary">
+        <li><span>Work hours</span><span id="summary-hours"></span></li>
+        <li><span>Breaks</span><span id="summary-breaks"></span></li>
+        <li><span>Blocked</span><span id="summary-sites"></span></li>
+        <li><span>Cleanups</span><span id="summary-cleanup"></span></li>
+      </ul>
+      <p class="tip">
+        <strong>Pin the extension.</strong> Click the puzzle-piece icon in Chrome's toolbar
+        and pin Focus Mode. The icon shows how much focus time is left, and it's where
+        you take breaks.
+      </p>
+      <p class="hint">
+        From the toolbar icon you can also <strong>lock</strong> your settings until a set
+        time, so you can't loosen them on impulse.
+      </p>
+      <div class="nav">
+        <button type="button" class="secondary" data-back>Back</button>
+        <button type="button" class="primary" id="finish">Finish</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="already" hidden>
+      <h1>Already set up</h1>
+      <p class="lead">
+        Focus Mode is already configured. Use the toolbar icon to change your hours,
+        sites and cleanups.
+      </p>
+    </section>
+  </main>
+  <script type="module" src="setup.js"></script>
+</body>
+</html>

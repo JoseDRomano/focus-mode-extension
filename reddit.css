@@ -1,0 +1,13 @@
+/* Front page and the popular/all feeds; individual subreddits stay */
+html[data-fm-reddithome]:is(
+  [data-fm-path="/"],
+  [data-fm-path^="/r/popular"],
+  [data-fm-path^="/r/all"],
+  [data-fm-path^="/best"],
+  [data-fm-path^="/hot"],
+  [data-fm-path^="/new/"],
+  [data-fm-path^="/top"],
+  [data-fm-path^="/rising"]
+) shreddit-feed {
+  display: none !important;
+}

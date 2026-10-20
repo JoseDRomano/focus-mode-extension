@@ -1,0 +1,4 @@
+/* Reels and Explore links in the navigation */
+html[data-fm-instagramreels] :is(a[href="/reels/"], a[href="/explore/"]) {
+  display: none !important;
+}

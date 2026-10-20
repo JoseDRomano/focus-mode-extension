@@ -1,0 +1,5 @@
+/* Feed column and the right sidebar (LinkedIn News) on the home feed. Single
+   posts (/feed/update/...) stay visible so shared links still work. */
+html[data-fm-linkedinfeed]:is([data-fm-path="/feed/"], [data-fm-path="/feed"]) :is(main, .scaffold-layout__aside) {
+  display: none !important;
+}

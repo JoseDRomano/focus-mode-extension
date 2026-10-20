@@ -1,0 +1,12 @@
+/* Posts in the home timeline; the composer above it stays */
+html[data-fm-xhome][data-fm-path="/home"] [data-testid="primaryColumn"] [data-testid="cellInnerDiv"] {
+  display: none !important;
+}
+
+/* Trends and "Who to follow" in the right sidebar */
+html[data-fm-xtrends] [data-testid="sidebarColumn"] :is(
+  section:has([data-testid="trend"]),
+  aside:has([data-testid="UserCell"])
+) {
+  display: none !important;
+}

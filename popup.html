@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Focus Mode</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      width: 360px;
+      min-height: 480px;
+      padding: 18px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .header h1 { margin: 0; }
+
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-button {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .icon-button:hover,
+    .icon-button[aria-pressed="true"] { border-color: var(--fg); }
+
+    .icon-button.locked {
+      background: var(--fg);
+      color: var(--bg);
+      border-color: var(--fg);
+    }
+
+    .icon-button svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .icon-button:not(.locked) .icon-locked,
+    .icon-button.locked .icon-unlocked { display: none; }
+
+    .notice {
+      margin: 0 0 16px;
+      padding: 10px 12px;
+      border: 1px solid var(--fg);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    /* Status card */
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .status[data-state="blocking"] {
+      background: var(--fg);
+      color: var(--bg);
+      border-color: var(--fg);
+    }
+
+    .status p { margin: 0; }
+
+    .status-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .status-detail {
+      margin-top: 2px !important;
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    .status button {
+      flex: none;
+      padding: 7px 12px;
+      font-size: 0.75rem;
+      border-color: currentColor;
+      color: inherit;
+    }
+
+    /* Tabs */
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      padding: 3px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .tabs[hidden] { display: none; }
+
+    .tabs button {
+      font: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 6px 0;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .tabs button:hover { color: var(--fg); }
+
+    .tabs button[aria-selected="true"] {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    #save-status {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    #save-status.error { color: var(--fg); }
+
+    #lock-error,
+    #cleanup-error { font-size: 0.8rem; }
+
+    #cleanup-error:empty { display: none; }
+
+    input[type="datetime-local"] { width: 100%; }
+
+    .lock-status {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    /* Stats */
+
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tile {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .tile-label {
+      color: var(--muted);
+      font-size: 0.7rem;
+      line-height: 1.3;
+    }
+
+    .tile-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .section-label {
+      margin: 0 0 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .bars {
+      list-style: none;
+      margin: 0 0 20px;
+      padding: 0;
+    }
+
+    .bars li {
+      display: grid;
+      grid-template-columns: 110px 1fr 28px;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 0.8rem;
+    }
+
+    .bars li.empty {
+      display: block;
+      color: var(--muted);
+    }
+
+    .bar-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bar {
+      height: 8px;
+      min-width: 4px;
+      border-radius: 0 4px 4px 0;
+      background: var(--fg);
+    }
+
+    .bar-value {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #history-list { margin-top: 0; }
+
+    .list li.history-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      padding: 8px 12px;
+    }
+
+    .history-item time {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    /* Dialogs */
+
+    dialog {
+      width: 300px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    dialog::backdrop { background: rgb(0 0 0 / 0.5); }
+
+    dialog input[type="text"] { width: 100%; margin-bottom: 8px; }
+
+    .sentence {
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border: 1px dashed var(--fg);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      line-height: 1.4;
+      user-select: none;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Wheel of destiny */
+
+    #destiny-dialog { text-align: center; }
+
+    .wheel-wrap {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 16px auto 12px;
+    }
+
+    .wheel-pointer {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      z-index: 1;
+      transform: translateX(-50%);
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-top: 14px solid var(--fg);
+    }
+
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border: 2px solid var(--fg);
+      border-radius: 50%;
+      background: conic-gradient(var(--fg) 0 var(--focus, 50%), var(--bg) var(--focus, 50%) 100%);
+    }
+
+    .wheel-legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 0 0 12px;
+      padding: 0;
+      list-style: none;
+      font-size: 0.8rem;
+    }
+
+    .wheel-legend li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border: 1px solid var(--fg);
+      border-radius: 2px;
+    }
+
+    .swatch-focus { background: var(--fg); }
+
+    #destiny-result .dialog-actions { justify-content: center; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Focus Mode</h1>
+    <div class="header-actions">
+      <button type="button" class="icon-button" id="settings-toggle" aria-pressed="false" aria-label="Settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      </button>
+      <button type="button" class="icon-button" id="lock-toggle" aria-pressed="false" aria-label="Lock settings" title="Lock settings">
+        <svg class="icon-unlocked" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="11" width="14" height="10" rx="2"></rect>
+          <path d="M8 11V7a4 4 0 0 1 7.75-1.4"></path>
+        </svg>
+        <svg class="icon-locked" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="11" width="14" height="10" rx="2"></rect>
+          <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="status-card" class="status">
+    <div>
+      <p id="status-title" class="status-title"></p>
+      <p id="status-detail" class="status-detail"></p>
+    </div>
+    <button type="button" class="secondary" id="break-button" hidden></button>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Settings" hidden>
+    <button type="button" role="tab" data-tab="schedule" aria-selected="true">Schedule</button>
+    <button type="button" role="tab" data-tab="sites" aria-selected="false">Sites</button>
+    <button type="button" role="tab" data-tab="cleanup" aria-selected="false">Cleanup</button>
+  </nav>
+
+  <section id="schedule" role="tabpanel" hidden>
+    <p id="schedule-notice" class="notice" hidden></p>
+    <form id="schedule-form">
+      <div id="schedule-editor"></div>
+      <fieldset class="field-pair">
+        <legend>Breaks</legend>
+        <label>Per day <input type="number" id="breaks-per-day" min="0" max="20" step="1" required></label>
+        <label>Minutes each <input type="number" id="break-minutes" min="1" max="60" step="1" required></label>
+      </fieldset>
+      <div class="actions">
+        <button type="submit" class="primary">Save</button>
+        <span id="save-status"></span>
+      </div>
+    </form>
+  </section>
+
+  <section id="sites" role="tabpanel" hidden>
+    <p id="sites-notice" class="notice" hidden></p>
+    <form id="site-form" class="add-site">
+      <input type="text" id="site-input" placeholder="e.g. reddit.com" autocomplete="off" spellcheck="false">
+      <button type="submit" class="primary">Add</button>
+    </form>
+    <p id="site-error" class="error"></p>
+    <ul id="site-list" class="list"></ul>
+  </section>
+
+  <section id="cleanup" role="tabpanel" hidden>
+    <p id="cleanup-notice" class="notice" hidden></p>
+    <p class="hint">Applied whenever these sites aren't blocked.</p>
+    <p id="cleanup-error" class="error"></p>
+    <div id="cleanup-toggles"></div>
+  </section>
+
+  <section id="lock" role="tabpanel" hidden>
+    <h2>Lock settings</h2>
+    <p id="lock-status" class="lock-status"></p>
+    <p class="hint">
+      While locked, you can still add sites, extend your hours and turn cleanups on,
+      but you can't loosen anything, not even with the typed confirmation.
+    </p>
+    <form id="lock-form">
+      <fieldset>
+        <legend>Lock until</legend>
+        <input type="datetime-local" id="lock-input" required>
+      </fieldset>
+      <div class="actions">
+        <button type="submit" class="primary" id="lock-button">Lock</button>
+        <span id="lock-error" class="error"></span>
+      </div>
+    </form>
+  </section>
+
+  <section id="stats" role="tabpanel">
+    <div class="tiles">
+      <div class="tile">
+        <span class="tile-label">Focus hours, last 7 days</span>
+        <span id="stat-focus" class="tile-value">0</span>
+      </div>
+      <div class="tile">
+        <span class="tile-label">Days without a bypass</span>
+        <span id="stat-streak" class="tile-value">0</span>
+      </div>
+      <div class="tile">
+        <span class="tile-label">Blocked visits today</span>
+        <span id="stat-blocked" class="tile-value">0</span>
+      </div>
+    </div>
+    <h2 class="section-label">Top distractions, last 7 days</h2>
+    <ul id="top-sites" class="bars"></ul>
+    <h2 class="section-label">Bypass history</h2>
+    <ul id="history-list" class="list"></ul>
+  </section>
+
+  <dialog id="bypass-dialog">
+    <form method="dialog">
+      <h2>Are you sure?</h2>
+      <p class="hint">To continue (<strong id="bypass-action"></strong>), type this sentence:</p>
+      <p id="bypass-sentence" class="sentence"></p>
+      <input type="text" id="bypass-input" autocomplete="off" spellcheck="false" autofocus>
+      <p class="hint">Then the wheel of destiny decides. Either way, it's recorded in your stats.</p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="bypass-cancel">Cancel</button>
+        <button type="submit" class="primary" id="bypass-confirm" value="confirm" disabled>Spin</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="destiny-dialog">
+    <h2 id="destiny-title"></h2>
+    <div class="wheel-wrap">
+      <div class="wheel-pointer"></div>
+      <div id="wheel" class="wheel"></div>
+    </div>
+    <ul class="wheel-legend">
+      <li><span class="swatch swatch-focus"></span>Back to work <strong id="odds-focus"></strong></li>
+      <li><span class="swatch"></span>Unfocus <strong id="odds-free"></strong></li>
+    </ul>
+    <div id="destiny-result" hidden>
+      <p id="destiny-message" class="hint"></p>
+      <div class="dialog-actions">
+        <button type="button" class="primary" id="destiny-ok"></button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="lock-dialog">
+    <form method="dialog">
+      <h2>Lock settings?</h2>
+      <p id="lock-dialog-text" class="hint"></p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="lock-cancel">Cancel</button>
+        <button type="submit" class="primary" value="confirm">Lock</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
