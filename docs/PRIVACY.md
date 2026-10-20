@@ -40,4 +40,4 @@ Uninstalling Focus Mode deletes everything it stored.
 
 ## Contact
 
-Questions about this policy: [your contact email]
+Questions about this policy: [jdromano@outlook.pt](mailto:jdromano@outlook.pt)

@@ -70,7 +70,7 @@ chosen work hours and hiding distracting sections of selected sites.
 - [ ] At least 1 screenshot, 1280×800 or 640×400: popup, setup page, blocked page,
       wheel of destiny
 - [ ] Optional small promo tile, 440×280
-- [ ] Privacy policy URL: fill in the contact email in `docs/PRIVACY.md`, then use
+- [x] Privacy policy URL:
       https://github.com/JoseDRomano/focus-mode-extension/blob/main/docs/PRIVACY.md
 
 ## Publishing
